@@ -1,0 +1,19 @@
+# Use official Node.js image as base 
+FROM node:20
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy application source code
+COPY . .
+
+VOLUME ["/app/uploads"]
+# Expose port (change if your server uses a different port)
+EXPOSE 3020
+
+# Start the server
+CMD ["npm", "start"]

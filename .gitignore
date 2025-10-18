@@ -1,0 +1,61 @@
+# ======================
+# Node.js
+# ======================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Logs
+logs
+*.log
+logs/*.log
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Environment variables
+.env
+.env.*.local
+
+# Coverage
+coverage/
+*.lcov
+
+# Build output
+dist/
+build/
+tmp/
+temp/
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ======================
+# Sequelize / Prisma / DB
+# ======================
+migrations/
+seeders/
+*.sqlite
+*.db
+*.sql
+
+# ======================
+# Optional (frontend con Vite/React)
+# ======================
+*.local
+.cache/
+.eslintcache
+vite.config.ts.timestamp-*
+./src/uploads/users/*
+./src/uploads/products/*
+./src/uploads/tmp/*

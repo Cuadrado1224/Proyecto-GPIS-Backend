@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: ./DockerFile
+    environment:
+      DB_NAME: marketplace
+      DB_USER: Cuadrado1224
+      DB_PASS: 1234
+      DB_HOST: db-postgres
+      DB_DIALECT: postgres
+      JWT_SECRET: mi_secreto_jwt
+      PORT: 3020
+      PORT_SWAGGER: 8080
+    depends_on:
+      - db-postgres
+    ports:
+      - "8080:3020"
+    volumes:
+      - uploads_data:/usr/src/app/uploads
+
+  db-postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: marketplace
+      POSTGRES_USER: Cuadrado1224
+      POSTGRES_PASSWORD: 1234
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5555:5432"
+
+volumes:
+  postgres_data:
+  uploads_data:
