@@ -11,6 +11,9 @@ import Conversation from "./conversation.model.js";
 import Message from "./message.model.js";
 import Notification from "./notification.model.js";
 import NotificationType from "./notificationType.model.js";
+import Incidence from "./incidence.model.js";
+import Appeal from "./appeals.model.js";
+import Report from "./reports.models.js";
 
 /* ==========================
    RELATIONS
@@ -71,6 +74,24 @@ Message.belongsTo(User, { foreignKey: "senderId" });
 // Users ↔ Notifications
 User.hasMany(Notification, { foreignKey: "userId" });
 Notification.belongsTo(User, { foreignKey: "userId" });
+//User ↔ Incidences
+User.hasMany(Incidence, { foreignKey: "userId" });
+Incidence.belongsTo(User, { foreignKey: "userId" });
+//Product ↔ Incidences
+Product.hasMany(Incidence, { foreignKey: "productId" });
+Incidence.belongsTo(Product, { foreignKey: "productId" });
+//Incidences ↔ Appeals
+Incidence.hasMany(Appeal, { foreignKey: "incidenceId" });
+Appeal.belongsTo(Incidence, { foreignKey: "incidenceId" });
+//Users ↔ Appeals
+User.hasMany(Appeal, { foreignKey: "userId" });
+Appeal.belongsTo(User, { foreignKey: "userId" });
+//Users ↔ Reports
+User.hasMany(Report, { foreignKey: "userId" });
+Report.belongsTo(User, { foreignKey: "userId" });
+//Products ↔ Reports
+Product.hasMany(Report, { foreignKey: "productId" });
+Report.belongsTo(Product, { foreignKey: "productId" });
 
 // NotificationTypes ↔ Notifications
 NotificationType.hasMany(Notification, { foreignKey: "typeId" });
@@ -92,4 +113,7 @@ export {
   Message,
   Notification,
   NotificationType,
+  Incidence,
+  Appeal,
+  Report
 };
