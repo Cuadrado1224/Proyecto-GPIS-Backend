@@ -6,7 +6,7 @@ const Appeals = sequelize.define("Appeals", {
     dateAppeals:{ type: DataTypes.DATE, allowNull: false},
     description:{ type: DataTypes.TEXT, allowNull: false},
     incidenceId:{ type: DataTypes.BIGINT, allowNull: false, field: "incidenceId"},
-    userId:{ type: DataTypes.BIGINT, allowNull: false, field: "userId"},
+   
 },{
     tableName: "appeals",
     timestamps: false,

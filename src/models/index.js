@@ -83,9 +83,7 @@ Incidence.belongsTo(Product, { foreignKey: "productId" });
 //Incidences ↔ Appeals
 Incidence.hasMany(Appeal, { foreignKey: "incidenceId" });
 Appeal.belongsTo(Incidence, { foreignKey: "incidenceId" });
-//Users ↔ Appeals
-User.hasMany(Appeal, { foreignKey: "userId" });
-Appeal.belongsTo(User, { foreignKey: "userId" });
+
 //Users ↔ Reports
 User.hasMany(Report, { foreignKey: "userId" });
 Report.belongsTo(User, { foreignKey: "userId" });
