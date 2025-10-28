@@ -11,6 +11,7 @@ const User = sequelize.define("User", {
   phone: { type: DataTypes.STRING, allowNull: false },
   avatarUrl: { type: DataTypes.TEXT, allowNull: false, field: "avatar_url" },
   rating: { type: DataTypes.BIGINT, allowNull: false },
+  verified: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
 }, {
   tableName: "users",
   timestamps: false,
