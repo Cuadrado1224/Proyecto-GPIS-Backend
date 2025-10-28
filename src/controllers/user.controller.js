@@ -67,10 +67,6 @@ export const getUserById = async (req, res) => {
 // ===============================================
 // Registrar usuario
 // ===============================================
-// ===============================================
-// Registrar usuario
-// ===============================================
-// ...existing code...
 export const register = async (req, res) => {
   const t = await sequelize.transaction();
   try {
@@ -88,7 +84,7 @@ export const register = async (req, res) => {
     if (userDniExists) {
       await t.rollback();
       if (req.file) fs.unlinkSync(req.file.path);
-      return res.status(400).json({ message: "DNI ya registrado" });
+      return res.status(400).json({ message: "Cedula ya registrada" });
     }
 
     const role = await Role.findByPk(roleId, { transaction: t });
@@ -266,7 +262,7 @@ export const updateAvatar = async (req, res) => {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
-    const dni = user.dni; // usamos el dni del usuario ya creado
+    const dni = user.dni; 
 
     // Procesar avatar
     let avatarUrl = user.avatarUrl;
