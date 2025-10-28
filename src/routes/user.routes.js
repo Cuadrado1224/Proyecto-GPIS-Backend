@@ -39,6 +39,9 @@ const router = Router();
  *           type: string
  *         rating:
  *           type: number
+ *         status:
+ *           type: string
+ *           example: "activo"
  *         Roles:
  *           type: array
  *           items:
@@ -73,6 +76,9 @@ const router = Router();
  *           type: string
  *         roleId:
  *           type: integer
+ *         status:
+ *           type: string
+ *           example: "activo"
  *     UserLogin:
  *       type: object
  *       required:
@@ -94,6 +100,8 @@ const router = Router();
  *           type: string
  *         roleId:
  *           type: integer
+ *         status:
+ *           type: string
  */
 
 /**
@@ -206,6 +214,8 @@ router.get("/:id", authenticateToken, getUserById);
  *                 type: string
  *               roleId:
  *                 type: integer
+ *               status:
+ *                 type: string
  *               avatar:
  *                 type: string
  *                 format: binary

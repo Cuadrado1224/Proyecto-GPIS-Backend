@@ -35,6 +35,7 @@ export async function seedData() {
           avatarUrl:
             "/uploads/common/user-common.png",
           rating: 5,
+          status: "activo",
 
         },
       ],
