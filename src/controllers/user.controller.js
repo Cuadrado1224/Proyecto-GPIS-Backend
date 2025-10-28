@@ -165,7 +165,13 @@ export const login = async (req, res) => {
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) return res.status(400).json({ message: "Contraseña incorrecta" });
 
-    // Obtener roles
+    if (!user.verified) {
+      return res.status(403).json({
+        message: "Cuenta no verificada. Revisa tu correo para verificarla o solicita un reenvío.",
+        code: "UNVERIFIED_ACCOUNT"
+      });
+    }
+
     const userRoles = await UserRole.findAll({
       where: { userId: user.id },
       include: [{ model: Role, as: "Role" }]

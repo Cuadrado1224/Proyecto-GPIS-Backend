@@ -254,6 +254,8 @@ router.post("/register", upload.single("avatar"), createUser);
  *                   type: string
  *       400:
  *         description: Usuario no encontrado o contraseña incorrecta
+ *       403:
+ *         description: Cuenta no verificada
  */
 router.post("/login", login);
 
