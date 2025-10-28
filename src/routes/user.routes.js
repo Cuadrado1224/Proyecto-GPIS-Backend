@@ -10,9 +10,15 @@ import {
   whoAmI,
   upload,
   updateAvatar,
-  updatePasswordUser
+  updatePasswordUser,
+  requestPasswordReset,
+  resetPassword,
+  verifyEmail,
+  resendVerification,
+  validateResetToken
 } from "../controllers/user.controller.js";
 import { authenticateToken } from "../middlewares/auth.middleware.js";
+import { verifyEmailPage, resetPasswordPage } from "../controllers/authPages.controller.js";
 
 const router = Router();
 
@@ -115,6 +121,13 @@ const router = Router();
  *                 $ref: '#/components/schemas/User'
  */
 router.get("/", authenticateToken, getAllUsers);
+
+// Rutas públicas: verificación y restablecimiento (deben ir antes de ":id")
+router.get("/verify-email", verifyEmailPage);
+router.post("/resend-verification", resendVerification);
+router.get("/reset-password", resetPasswordPage);
+router.post("/request-password-reset", requestPasswordReset);
+router.post("/reset-password", resetPassword);
 
 /**
  * @swagger
@@ -243,6 +256,14 @@ router.post("/register", upload.single("avatar"), createUser);
  *         description: Usuario no encontrado o contraseña incorrecta
  */
 router.post("/login", login);
+
+// Verificación de email
+router.get("/verify-email", verifyEmail);
+router.post("/resend-verification", resendVerification);
+
+// Restablecimiento de contraseña
+router.post("/request-password-reset", requestPasswordReset);
+router.post("/reset-password", resetPassword);
 
 /**
  * @swagger
@@ -377,6 +398,59 @@ router.put("/:id/avatar", upload.single("avatar"), updateAvatar);
 router.delete("/:id", authenticateToken, deleteUser);
 
 
+router.post("/request-password-reset", requestPasswordReset);
+/**
+ * @swagger
+ * /users/request-password-reset:
+ *   post:
+ *     summary: Solicita el restablecimiento de contraseña
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: "usuario@email.com"
+ *     responses:
+ *       200:
+ *         description: Email de restablecimiento enviado
+ *       404:
+ *         description: Usuario no encontrado
+ */
 
+/**
+ * @swagger
+ * /users/reset-password:
+ *   post:
+ *     summary: Restablece la contraseña usando el token recibido por email
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - newPassword
+ *             properties:
+ *               token:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *                 example: "NuevaContraseña123!"
+ *     responses:
+ *       200:
+ *         description: Contraseña restablecida correctamente
+ *       400:
+ *         description: Token inválido o expirado
+ */
+router.post("/reset-password", resetPassword);
 
 export default router;
