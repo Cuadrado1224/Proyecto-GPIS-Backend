@@ -20,7 +20,7 @@ export async function seedData() {
     );
 
     // Usuario Admin
-    let email = "email@email.com";
+    let email = "admin@shopybuy.com";
     await User.bulkCreate(
       [
         {
@@ -35,6 +35,7 @@ export async function seedData() {
           avatarUrl:
             "/uploads/common/user-common.png",
           rating: 5,
+          verified: true,
 
         },
       ],
