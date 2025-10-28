@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verifica tu cuenta</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f9fafb; color:#CF5C36; }
+    .container { max-width:600px; margin:20px auto; background:#ffffff; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; }
+    .header { background:#CF5C36; color:#ffffff; padding:16px 24px; font-size:18px; font-weight:bold; }
+    .content { padding:24px; }
+    .btn { display:inline-block; background:#CF5C36; color:#ffffff !important; text-decoration:none; padding:12px 16px; border-radius:6px; }
+    .footer { color:#6b7280; font-size:12px; margin-top:16px; }
+  </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">Verifica tu cuenta</div>
+      <div class="content">
+        <p>Hola {{name}},</p>
+        <p>Gracias por registrarte. Para activar tu cuenta, por favor verifica tu correo electrónico.</p>
+        <p>
+          <a class="btn" href="{{link}}" target="_blank" rel="noopener">Verificar cuenta</a>
+        </p>
+        <p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
+        <p><a href="{{link}}" target="_blank" rel="noopener">{{link}}</a></p>
+        <p class="footer">Este enlace expira en 24 horas.</p>
+      </div>
+    </div>
+  </body>
+</html>

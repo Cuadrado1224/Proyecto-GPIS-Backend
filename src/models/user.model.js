@@ -11,8 +11,7 @@ const User = sequelize.define("User", {
   phone: { type: DataTypes.STRING, allowNull: false },
   avatarUrl: { type: DataTypes.TEXT, allowNull: false, field: "avatar_url" },
   rating: { type: DataTypes.BIGINT, allowNull: false },
-  // Estado del usuario (Activo/Inactivo/etc.)
-  status: { type: DataTypes.STRING(15), allowNull: false, defaultValue: "activo" },
+  verified: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
 }, {
   tableName: "users",
   timestamps: false,

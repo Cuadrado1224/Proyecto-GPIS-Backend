@@ -1,0 +1,56 @@
+export const verifyEmail = async (req, res) => {
+  const t = await sequelize.transaction();
+  try {
+    const { token } = req.query;
+    console.log("Token recibido:", token);
+    if (!token) {
+      await t.rollback();
+      return res.status(400).json({ message: "Token requerido" });
+    }
+
+    const payload = verifyVerificationToken(token);
+    if (payload.type !== "verify") {
+      await t.rollback();
+      return res.status(400).json({ message: "Token inválido" });
+    }
+
+    const user = await User.findOne({ where: { email: payload.email }, transaction: t });
+    if (!user) {
+      await t.rollback();
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    if (!user.verified) {
+      await user.update({ verified: true }, { transaction: t });
+    }
+
+    await t.commit();
+    return res.json({ message: "Email verificado" });
+  } catch (error) {
+    await t.rollback();
+    return res.status(400).json({ message: "Token inválido o expirado", error: error.message });
+  }
+};
+
+// ===============================================
+// Reenviar verificación de email
+// ===============================================
+export const resendVerification = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: "Email requerido" });
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
+    if (user.verified) return res.json({ message: "La cuenta ya está verificada" });
+
+    const baseUrl = process.env.APP_BASE_URL || `${req.protocol}://${req.get("host")}`;
+    const token = generateVerificationToken(email);
+    const link = `${baseUrl}/users/verify-email?token=${encodeURIComponent(token)}`;
+    await sendVerificationEmail({ to: email, link, name: user.name });
+
+    return res.json({ message: "Correo de verificación reenviado" });
+  } catch (error) {
+    return res.status(500).json({ message: "Error al reenviar verificación", error: error.message });
+  }
+};

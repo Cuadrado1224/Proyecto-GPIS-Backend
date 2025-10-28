@@ -34,10 +34,10 @@ export const getAppealsByIncidence = async (req, res) => {
 
 export const createAppeal = async (req, res) => {
   try {
-    const { incidenceId, userId, message, status } = req.body;
+    const { incidenceId, message, status } = req.body;
 
-    if (!incidenceId || !userId || !message) {
-      return res.status(400).json({ message: "incidenceId, userId y message son requeridos" });
+    if (!incidenceId || !message) {
+      return res.status(400).json({ message: "incidenceId y message son requeridos" });
     }
 
     // Validar existencia de la incidencia
@@ -46,7 +46,6 @@ export const createAppeal = async (req, res) => {
 
     const appeal = await Appeal.create({
       incidenceId,
-      userId,
       message,
       status: status || "pending",
     });
