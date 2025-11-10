@@ -1,4 +1,5 @@
 import { Product, Category, User, ProductPhoto} from "../models/index.js";
+import { Op } from "sequelize";
 import path from "path";
 import fs from "fs";
 import multer from "multer";
@@ -33,12 +34,36 @@ export const uploadProductPhotos = multer({ storage, fileFilter });
 // =======================================================
 export const getAllProducts = async (req, res) => {
   try {
+    // Solo traer productos totalmente "activos":
+    // - status = 'active'
+    // - moderationStatus = 'active'
+    // Si en el futuro se desea incluir otros estados, se puede parametrizar con query params.
     const products = await Product.findAll({
+      where: { status: 'active', moderationStatus: 'active' },
       include: [{ model: ProductPhoto }]
     });
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: "Error al recuperar productos", error: error.message });
+  }
+};
+
+// =======================================================
+// Obtener todos los productos (vista moderación, admin)
+// =======================================================
+export const getAllProductsModeration = async (req, res) => {
+  try {
+    const isAdmin = req.user?.roles?.includes("Administrador");
+    if (!isAdmin) {
+      return res.status(403).json({ message: "No autorizado: solo administradores" });
+    }
+
+    const products = await Product.findAll({
+      include: [{ model: ProductPhoto }]
+    });
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Error al recuperar productos (moderación)", error: error.message });
   }
 };
 
@@ -78,7 +103,7 @@ export const getProductById = async (req, res) => {
 // =======================================================
 export const createProduct = async (req, res) => {
   try {
-    const { title, description, price, categoryId, status = "active",location,locationCoords } = req.body;
+    const { title, description, price, categoryId, location, locationCoords } = req.body;
     const sellerId = req.user.id; // del token
 
     const categoryExists = await Category.findByPk(categoryId);
@@ -94,9 +119,9 @@ export const createProduct = async (req, res) => {
       description,
       price,
       categoryId,
-      status,
       location,
       locationCoords: JSON.parse(locationCoords)
+      // status no se acepta por POST, queda en default 'active' para moderación
     });
 
     // Manejo de fotos
@@ -132,7 +157,7 @@ export const createProduct = async (req, res) => {
 // =======================================================
 export const updateProduct = async (req, res) => {
   try {
-    const { title, description, price, categoryId, status,location,locationCoords } = req.body;
+    const { title, description, price, categoryId, status, location, locationCoords } = req.body; // status vuelve a poder editarse por PUT
     const productId = req.params.id;
     const userId = req.user.id;
 
@@ -200,6 +225,33 @@ export const updateProduct = async (req, res) => {
   }
 };
 
+// =======================================================
+// Actualizar parámetro de moderación (solo admin)
+// =======================================================
+export const updateProductModeration = async (req, res) => {
+  try {
+    const { moderationStatus } = req.body;
+    const productId = req.params.id;
+
+    if (typeof moderationStatus !== 'string' || moderationStatus.length === 0) {
+      return res.status(400).json({ message: "moderationStatus es requerido y debe ser string" });
+    }
+
+    const product = await Product.findByPk(productId);
+    if (!product) return res.status(404).json({ message: "Producto no encontrado" });
+
+    const isAdmin = req.user?.roles?.includes("Administrador");
+    if (!isAdmin) {
+      return res.status(403).json({ message: "No autorizado: solo administradores pueden modificar moderationStatus" });
+    }
+
+    await product.update({ moderationStatus });
+    res.json({ message: "Moderation status actualizado", moderationStatus, product });
+  } catch (error) {
+    res.status(500).json({ message: "Error al actualizar moderationStatus", error: error.message });
+  }
+};
+
 
 // =======================================================
 // Actualizar estado de producto
@@ -208,7 +260,7 @@ export const updateProductStatus = async (req, res) => {
   try {
     const status = req.body.status;
     const productId = req.params.id;
-    const validStatuses = ["active", "sold", "inactive", "reserved"];
+    const validStatuses = ["active", "sold", "inactive", "reserved", "restricted"]; // agregar 'restricted' para moderación
 
     if (!validStatuses.includes(status)) return res.status(400).json({ message: "Status no válido" });
 

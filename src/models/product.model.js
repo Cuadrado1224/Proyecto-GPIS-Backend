@@ -39,6 +39,13 @@ const Product = sequelize.define("Product", {
   status: {
     type: DataTypes.ENUM("active", "sold", "inactive", "reserved", "restricted"),
     allowNull: false,
+    defaultValue: "active", // default para moderación: los productos nuevos quedan activos
+  },
+  moderationStatus: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: "active",
+    field: "moderation_status",
   },
 }, {
   tableName: "products",
