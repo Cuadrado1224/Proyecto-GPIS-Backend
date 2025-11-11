@@ -7,8 +7,8 @@ const Reports = sequelize.define("Reports", {
     dateReport:{ type: DataTypes.DATE, allowNull: false},
     typeReport:{  type: DataTypes.TEXT, allowNull: false},
     description:{ type: DataTypes.TEXT, allowNull: false},
-    userId:{ type: DataTypes.BIGINT, allowNull: false, field: "user_id"},
-    productId:{ type: DataTypes.BIGINT, allowNull: false, field: "product_id"},
+    userId:{ type: DataTypes.BIGINT, allowNull: false, field: "userId"},
+    productId:{ type: DataTypes.BIGINT, allowNull: false, field: "productId"},
 },{tableName: "reports",
   timestamps: false,
 });

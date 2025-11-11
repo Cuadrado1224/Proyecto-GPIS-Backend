@@ -10,6 +10,12 @@ services:
       DB_PASS: 1234
       DB_HOST: db-postgres
       DB_DIALECT: postgres
+      DB_PORT: 5432
+      EMAIL_USER: melcuadrado09@gmail.com
+      EMAIL_PASS: vzle rxbh dcba ecel
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 587
+      SMTP_SECURE: false
       JWT_SECRET: mi_secreto_jwt
       PORT: 3020
       PORT_SWAGGER: 8080
