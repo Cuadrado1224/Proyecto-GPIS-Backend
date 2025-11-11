@@ -1,11 +1,13 @@
 import { Router } from "express";
 import {
   getAllProducts,
+  getAllProductsModeration,
   getProductById,
   getMyProducts,
   createProduct,
   updateProduct,
   updateProductStatus,
+  updateProductModeration,
   deleteProduct,
   uploadProductPhotos
 } from "../controllers/product.controller.js";
@@ -24,8 +26,8 @@ const router = Router();
  * @swagger
  * /products:
  *   get:
- *     summary: Obtener todos los productos
- *     description: Recupera una lista con todos los productos disponibles en el sistema.
+ *     summary: Obtener productos activos (público)
+ *     description: Recupera una lista con productos cuyo status es 'active' y moderationStatus es 'active'.
  *     tags: [Products]
  *     responses:
  *       200:
@@ -40,7 +42,7 @@ const router = Router();
  *         description: Error al recuperar productos
  *   post:
  *     summary: Crear un nuevo producto con fotos
- *     description: Crea un nuevo producto asociado a un vendedor, permitiendo subir múltiples imágenes.
+ *     description: Crea un nuevo producto asociado a un vendedor (status siempre inicia en 'active'; no editable en este endpoint), permitiendo subir múltiples imágenes.
  *     tags: [Products]
  *     requestBody:
  *       required: true
@@ -71,6 +73,31 @@ const router = Router();
  *         description: Error al crear producto
  */
 router.get("/", getAllProducts);
+/**
+ * @swagger
+ * /products/moderation:
+ *   get:
+ *     summary: Obtener todos los productos (moderación)
+ *     description: Devuelve todos los productos sin importar status ni moderationStatus. Solo administradores.
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de productos recuperada exitosamente (moderación)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Product'
+ *       403:
+ *         description: No autorizado
+ *       500:
+ *         description: Error al recuperar productos
+ */
+router.get("/moderation", authenticateToken, getAllProductsModeration);
+
 router.post("/",authenticateToken, uploadProductPhotos.array("photos", 10), createProduct);
 
 /**
@@ -123,7 +150,7 @@ router.get("/my",authenticateToken, getMyProducts);
  *         description: Producto no encontrado
  *   put:
  *     summary: Actualizar un producto y opcionalmente reemplazar sus fotos
- *     description: Permite actualizar los datos de un producto existente y subir nuevas imágenes.
+ *     description: Permite actualizar los datos de un producto existente (incluido 'status') y subir nuevas imágenes. Para el parámetro de moderación, usar PUT /products/{id}/moderation.
  *     tags: [Products]
  *     parameters:
  *       - in: path
@@ -141,6 +168,9 @@ router.get("/my",authenticateToken, getMyProducts);
  *               - $ref: '#/components/schemas/ProductInput'
  *               - type: object
  *                 properties:
+ *                   status:
+ *                     type: string
+ *                     enum: [active, sold, inactive, reserved, restricted]
  *                   photos:
  *                     type: array
  *                     items:
@@ -181,6 +211,47 @@ router.get("/my",authenticateToken, getMyProducts);
 router.get("/:id", getProductById);
 router.put("/:id",authenticateToken, uploadProductPhotos.array("photos", 10), updateProduct);
 router.delete("/:id",authenticateToken, deleteProduct);
+/**
+ * @swagger
+ * /products/{id}/moderation:
+ *   put:
+ *     summary: Actualizar el parámetro de moderación de un producto
+ *     description: Modifica únicamente moderationStatus (solo administradores). No tiene enum y por defecto es 'active'.
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - moderationStatus
+ *             properties:
+ *               moderationStatus:
+ *                 type: string
+ *                 description: Estado de moderación, por defecto 'active'. Sin enum.
+ *                 example: flagged
+ *     responses:
+ *       200:
+ *         description: Moderation status actualizado exitosamente
+ *       400:
+ *         description: Datos inválidos
+ *       403:
+ *         description: No autorizado
+ *       404:
+ *         description: Producto no encontrado
+ */
+router.put("/:id/moderation", authenticateToken, updateProductModeration);
+
 
 /**
  * @swagger
@@ -207,7 +278,7 @@ router.delete("/:id",authenticateToken, deleteProduct);
  *             properties:
  *               status:
  *                 type: string
- *                 enum: [active, sold, inactive, reserved]
+ *                 enum: [active, sold, inactive, reserved, restricted]
  *                 example: sold
  *     responses:
  *       200:
@@ -249,7 +320,11 @@ export default router;
  *           type: integer
  *         status:
  *           type: string
- *           enum: [active, sold, inactive, reserved]
+ *           enum: [active, sold, inactive, reserved, restricted]
+ *           default: active
+ *         moderationStatus:
+ *           type: string
+ *           description: Parámetro de moderación (sin enum). Por defecto 'active'.
  *         photos:
  *           type: array
  *           items:
@@ -267,6 +342,7 @@ export default router;
  *         price: 250.5
  *         categoryId: 3
  *         status: active
+ *         moderationStatus: active
  *         photos:
  *           - "https://example.com/foto1.jpg"
  *           - "https://example.com/foto2.jpg"
@@ -295,9 +371,6 @@ export default router;
  *           format: float
  *         categoryId:
  *           type: integer
- *         status:
- *           type: string
- *           enum: [active, sold, inactive, reserved]
  *       example:
  *         sellerId: 10
  *         title: "Bicicleta de montaña"
@@ -308,7 +381,6 @@ export default router;
  *           lng: -70.6693
  *         price: 250.5
  *         categoryId: 3
- *         status: active
  *
  *     LocationCoords:
  *       type: object

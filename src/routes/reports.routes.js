@@ -17,13 +17,17 @@ const router = express.Router();
  *       properties:
  *         id:
  *           type: integer
+ *         dateReport:
+ *           type: string
+ *           format: date-time
+ *           description: Fecha y hora en que se creó el reporte
  *         type:
  *           type: string
  *         description:
  *           type: string
  *         userId:
  *           type: integer
- *         targetId:
+ *         productId:
  *           type: integer
  */
 

@@ -34,17 +34,19 @@ export const getReportsByUser = async (req, res) => {
 
 export const createReport = async (req, res) => {
   try {
-    const { type, description, userId, targetId } = req.body;
+    const { type, description, userId, productId } = req.body;
 
-    if (!type || !description || !userId || !targetId) {
-      return res.status(400).json({ message: "type, description, userId y targetId son requeridos" });
+    if (!type || !description || !userId || !productId) {
+      return res.status(400).json({ message: "type, description, userId y productId son requeridos" });
     }
 
+    // Map API fields to model fields and set date by default
     const report = await Report.create({
-      type,
+      dateReport: new Date(),
+      typeReport: type,
       description,
       userId,
-      targetId,
+      productId,
     });
 
     res.status(201).json({ message: "Reporte creado", report });
