@@ -45,6 +45,9 @@ const router = Router();
  *           type: string
  *         rating:
  *           type: number
+ *         ratingCount:
+ *           type: integer
+ *           description: Cantidad de calificaciones recibidas
  *         Roles:
  *           type: array
  *           items:
