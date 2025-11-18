@@ -2,7 +2,6 @@ import sequelize from "../config/database.js";
 import SellerRating from "../models/sellerRating.model.js";
 import User from "../models/user.model.js";
 
-// Crear o actualizar calificación de un vendedor
 export const upsertSellerRating = async (req, res) => {
   const t = await sequelize.transaction();
   try {
@@ -38,7 +37,6 @@ export const upsertSellerRating = async (req, res) => {
       ratingRow = await SellerRating.create({ sellerId, raterId, score: numericScore, comment }, { transaction: t });
     }
 
-    // Recalcular promedio y cantidad
     const [aggUpsert] = await SellerRating.findAll({
       where: { sellerId },
       attributes: [
