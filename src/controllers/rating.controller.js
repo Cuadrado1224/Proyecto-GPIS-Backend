@@ -39,13 +39,18 @@ export const upsertSellerRating = async (req, res) => {
     }
 
     // Recalcular promedio y cantidad
-    const [result] = await sequelize.query(
-      `SELECT AVG(score)::numeric as avg_score, COUNT(*) as cnt FROM seller_ratings WHERE seller_id = :sellerId`,
-      { replacements: { sellerId }, type: sequelize.QueryTypes.SELECT, transaction: t }
-    );
+    const [aggUpsert] = await SellerRating.findAll({
+      where: { sellerId },
+      attributes: [
+        [sequelize.fn("AVG", sequelize.col("score")), "avg"],
+        [sequelize.fn("COUNT", sequelize.col("id")), "cnt"],
+      ],
+      raw: true,
+      transaction: t,
+    });
 
-    const avg = parseFloat(result?.avg_score ?? 0) || 0;
-    const cnt = parseInt(result?.cnt ?? 0, 10) || 0;
+    const avg = parseFloat(aggUpsert?.avg ?? 0) || 0;
+    const cnt = parseInt(aggUpsert?.cnt ?? 0, 10) || 0;
 
     await User.update({ rating: avg, ratingCount: cnt }, { where: { id: sellerId }, transaction: t });
 
@@ -73,13 +78,18 @@ export const deleteSellerRating = async (req, res) => {
     await ratingRow.destroy({ transaction: t });
 
     // Recalcular
-    const [result] = await sequelize.query(
-      `SELECT AVG(score)::numeric as avg_score, COUNT(*) as cnt FROM seller_ratings WHERE seller_id = :sellerId`,
-      { replacements: { sellerId }, type: sequelize.QueryTypes.SELECT, transaction: t }
-    );
+    const [aggDelete] = await SellerRating.findAll({
+      where: { sellerId },
+      attributes: [
+        [sequelize.fn("AVG", sequelize.col("score")), "avg"],
+        [sequelize.fn("COUNT", sequelize.col("id")), "cnt"],
+      ],
+      raw: true,
+      transaction: t,
+    });
 
-    const avg = parseFloat(result?.avg_score ?? 0) || 0;
-    const cnt = parseInt(result?.cnt ?? 0, 10) || 0;
+    const avg = parseFloat(aggDelete?.avg ?? 0) || 0;
+    const cnt = parseInt(aggDelete?.cnt ?? 0, 10) || 0;
 
     await User.update({ rating: avg, ratingCount: cnt }, { where: { id: sellerId }, transaction: t });
 
