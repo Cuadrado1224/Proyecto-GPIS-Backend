@@ -14,6 +14,7 @@ import NotificationType from "./notificationType.model.js";
 import Incidence from "./incidence.model.js";
 import Appeal from "./appeals.model.js";
 import Report from "./reports.models.js";
+import SellerRating from "./sellerRating.model.js";
 
 /* ==========================
    RELATIONS
@@ -75,6 +76,12 @@ Message.belongsTo(User, { foreignKey: "senderId" });
 User.hasMany(Notification, { foreignKey: "userId" });
 Notification.belongsTo(User, { foreignKey: "userId" });
 //User ↔ Incidences
+
+// Users ↔ SellerRatings (calificaciones de vendedores)
+User.hasMany(SellerRating, { foreignKey: "sellerId", as: "receivedRatings" });
+User.hasMany(SellerRating, { foreignKey: "raterId", as: "givenRatings" });
+SellerRating.belongsTo(User, { foreignKey: "sellerId", as: "seller" });
+SellerRating.belongsTo(User, { foreignKey: "raterId", as: "rater" });
 User.hasMany(Incidence, { foreignKey: "userId" });
 Incidence.belongsTo(User, { foreignKey: "userId" });
 //Product ↔ Incidences
@@ -114,4 +121,5 @@ export {
   Incidence,
   Appeal,
   Report
+   , SellerRating
 };
