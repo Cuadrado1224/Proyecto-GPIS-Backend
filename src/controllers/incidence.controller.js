@@ -34,7 +34,7 @@ export const getIncidencesByUser = async (req, res) => {
 
 export const createIncidence = async (req, res) => {
   try {
-    const { description, userId, productId, moderatorId, status } = req.body;
+    const { description, userId, productId, status } = req.body;
 
     if (!description || !userId || !productId) {
       return res.status(400).json({ message: "description, userId y productId son requeridos" });
@@ -43,9 +43,8 @@ export const createIncidence = async (req, res) => {
     const incidence = await Incidence.create({
       dateIncidence: new Date(),
       description,
-      userId,
+      userId, // ahora representa moderador/administrador asignado
       productId,
-      moderatorId: moderatorId || userId,
       status: status || "pending",
     });
 
@@ -59,7 +58,7 @@ export const createIncidence = async (req, res) => {
 export const updateIncidence = async (req, res) => {
   try {
     const incidenceId = req.params.id;
-    const { description, status, productId, moderatorId } = req.body;
+    const { description, status, productId, userId } = req.body; // userId opcional para reasignar
 
     const incidence = await Incidence.findByPk(incidenceId);
     if (!incidence) return res.status(404).json({ message: "Incidencia no encontrada" });
@@ -68,7 +67,7 @@ export const updateIncidence = async (req, res) => {
       description: description !== undefined ? description : incidence.description,
       status: status !== undefined ? status : incidence.status,
       productId: productId !== undefined ? productId : incidence.productId,
-      moderatorId: moderatorId !== undefined ? moderatorId : incidence.moderatorId
+      userId: userId !== undefined ? userId : incidence.userId,
     });
 
     res.json({ message: "Incidencia actualizada", incidence });
