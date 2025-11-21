@@ -8,6 +8,7 @@ const Message = sequelize.define("Message", {
   content: { type: DataTypes.TEXT, allowNull: false },
   sentAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, field: "sent_at" },
   read: { type: DataTypes.BOOLEAN, defaultValue: false },
+  isRatingMessage: { type: DataTypes.BOOLEAN, defaultValue: false, field: "is_rating_message" },
 }, {
   tableName: "messages",
   timestamps: false,
