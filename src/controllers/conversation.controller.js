@@ -59,10 +59,26 @@ export const createConversation = async (req, res) => {
         buyerId: userId,
       sellerId }
      });
+     let isNewConversation = false;
      if (!conversation) {
       conversation = await Conversation.create({ productId, buyerId: userId, sellerId });
+      isNewConversation = true;
+
+      // Crear mensaje automático de rating para el comprador (solo en primera conversación)
+      await Message.create({
+        conversationId: conversation.id,
+        senderId: sellerId, // Sistema (vendedor como "remitente" del mensaje)
+        content: "rating_prompt", // Identificador especial
+        read: false,
+        isRatingMessage: true
+      });
      }
-     return res.status(201).json(conversation);
+     
+     return res.status(201).json({
+       ...conversation.toJSON(),
+       isNewConversation,
+       showRatingPrompt: isNewConversation
+     });
   } catch (error) {
     res.status(500).json({ message: "Error creando conversación", error:error.message });
   }

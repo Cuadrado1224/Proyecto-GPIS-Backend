@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { upsertSellerRating, deleteSellerRating } from "../controllers/rating.controller.js";
+import { upsertSellerRating, deleteSellerRating, submitRatingFromChat } from "../controllers/rating.controller.js";
 import { authenticateToken } from "../middlewares/auth.middleware.js";
 
 const router = Router();
@@ -10,6 +10,48 @@ const router = Router();
  *   name: Ratings
  *   description: Calificaciones de vendedores
  */
+
+/**
+ * @swagger
+ * /ratings/chat/submit:
+ *   post:
+ *     summary: Enviar calificación desde mensaje de chat
+ *     tags: [Ratings]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - conversationId
+ *               - sellerId
+ *               - score
+ *             properties:
+ *               conversationId:
+ *                 type: integer
+ *                 example: 1
+ *               sellerId:
+ *                 type: integer
+ *                 example: 2
+ *               score:
+ *                 type: number
+ *                 format: float
+ *                 example: 4.5
+ *               comment:
+ *                 type: string
+ *                 example: "Excelente vendedor"
+ *     responses:
+ *       200:
+ *         description: Calificación guardada
+ *       400:
+ *         description: Error de validación
+ *       403:
+ *         description: No autorizado
+ */
+router.post("/chat/submit", authenticateToken, submitRatingFromChat);
 
 /**
  * @swagger
