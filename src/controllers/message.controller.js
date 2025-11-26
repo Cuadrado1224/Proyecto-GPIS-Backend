@@ -79,6 +79,7 @@ export const createMessage = async (req, res) => {
     await Notification.create({
       userId: receiverId,
       typeId: type.id,
+      title: "Nuevo mensaje",
       message: `Nuevo mensaje en el producto ${conversation.productId}`,
     });
 

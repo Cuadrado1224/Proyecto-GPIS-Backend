@@ -1,4 +1,4 @@
-import { Product, Category, User, ProductPhoto} from "../models/index.js";
+import { Product, Category, User, ProductPhoto, Incidence} from "../models/index.js";
 import { Op } from "sequelize";
 import path from "path";
 import fs from "fs";
@@ -241,13 +241,68 @@ export const updateProductModeration = async (req, res) => {
     if (!product) return res.status(404).json({ message: "Producto no encontrado" });
 
     const isAdmin = req.user?.roles?.includes("Administrador");
-    if (!isAdmin) {
-      return res.status(403).json({ message: "No autorizado: solo administradores pueden modificar moderationStatus" });
+    const isModerador = req.user?.roles?.includes("Moderador");
+    
+    if (!isAdmin && !isModerador) {
+      return res.status(403).json({ message: "No autorizado: solo administradores y moderadores pueden modificar moderationStatus" });
     }
 
+    const previousModerationStatus = product.moderationStatus;
     await product.update({ moderationStatus });
+
+    // Crear incidencia automáticamente cuando se cambia a 'review' o 'block'
+    // Solo crear si es un cambio nuevo (no si ya existía una incidencia para este estado)
+    if ((moderationStatus === 'review' || moderationStatus === 'block') && 
+        previousModerationStatus !== moderationStatus) {
+      
+      // Verificar si ya existe una incidencia pendiente/en revisión para este producto
+      const existingIncidence = await Incidence.findOne({
+        where: {
+          productId: productId,
+          status: { [Op.in]: ['pending', 'in_progress'] }
+        }
+      });
+
+      // Solo crear si no existe una incidencia activa
+      if (!existingIncidence) {
+        const description = moderationStatus === 'review' 
+          ? `Producto marcado para revisión por moderación administrativa`
+          : `Producto bloqueado por moderación administrativa`;
+
+        const newIncidence = await Incidence.create({
+          dateIncidence: new Date(),
+          description,
+          userId: req.user.id, // Asignar al moderador/admin que hizo el cambio
+          productId: productId,
+          status: 'pending'
+        });
+
+        console.log(`✅ Incidencia creada automáticamente: ID ${newIncidence.id} para producto ${productId}`);
+      } else {
+        console.log(`ℹ️ Ya existe incidencia activa (ID ${existingIncidence.id}) para producto ${productId}`);
+      }
+    }
+
+    // Si se cambia a 'active', resolver incidencias pendientes automáticamente
+    if (moderationStatus === 'active' && previousModerationStatus !== 'active') {
+      const resolvedCount = await Incidence.update(
+        { status: 'resolved' },
+        {
+          where: {
+            productId: productId,
+            status: { [Op.in]: ['pending', 'in_progress'] }
+          }
+        }
+      );
+
+      if (resolvedCount[0] > 0) {
+        console.log(`✅ ${resolvedCount[0]} incidencia(s) resuelta(s) automáticamente para producto ${productId}`);
+      }
+    }
+
     res.json({ message: "Moderation status actualizado", moderationStatus, product });
   } catch (error) {
+    console.error("Error en updateProductModeration:", error);
     res.status(500).json({ message: "Error al actualizar moderationStatus", error: error.message });
   }
 };
