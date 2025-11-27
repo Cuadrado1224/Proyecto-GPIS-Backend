@@ -1,4 +1,5 @@
 import { Incidence, Product, ProductPhoto, User, Appeal, Notification } from "../models/index.js";
+import { emitNotificationToUsers } from "../utils/websocket-emitter.js";
 
 export const getAllIncidences = async (req, res) => {
   try {
@@ -142,13 +143,16 @@ export const updateIncidence = async (req, res) => {
           notificationMessage += ` Observaciones: ${resolutionNotes}`;
         }
 
-        await Notification.create({
+        const notification = await Notification.create({
           userId: sellerId,
           typeId: 2, // Alerta (notificación de moderación)
           title: notificationTitle,
           message: notificationMessage,
           read: false
         });
+
+        // Emitir notificación en tiempo real vía WebSocket
+        emitNotificationToUsers(sellerId, notification.toJSON());
       }
     }
 

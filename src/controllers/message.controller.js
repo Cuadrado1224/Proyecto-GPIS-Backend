@@ -1,4 +1,5 @@
 import { Message, Conversation, Notification, NotificationType } from "../models/index.js";
+import { emitNotificationToUsers } from "../utils/websocket-emitter.js";
 
 // ===============================================
 //                  VALIDACIONES
@@ -76,12 +77,15 @@ export const createMessage = async (req, res) => {
     let type = await NotificationType.findOne({ where: { typeName: "Mensaje" } });
 
 
-    await Notification.create({
+    const notification = await Notification.create({
       userId: receiverId,
       typeId: type.id,
       title: "Nuevo mensaje",
       message: `Nuevo mensaje en el producto ${conversation.productId}`,
     });
+
+    // Emitir notificación en tiempo real vía WebSocket
+    emitNotificationToUsers(receiverId, notification.toJSON());
 
     res.status(201).json(message);
   } catch (error) {

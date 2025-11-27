@@ -75,9 +75,36 @@ export const getMyProducts = async (req, res) => {
     const userId = req.user.id;
     const products = await Product.findAll({
       where: { sellerId: userId },
-      include: [{ model: ProductPhoto }]
+      include: [
+        { model: ProductPhoto },
+        { 
+          model: Incidence,
+          attributes: ['id', 'status', 'resolution', 'resolutionNotes', 'resolvedAt'],
+          required: false // LEFT JOIN para incluir productos sin incidencias
+        }
+      ]
     });
-    res.json(products);
+    
+    // Mapear productos para incluir información de incidencia resuelta
+    const mappedProducts = products.map(product => {
+      const productData = product.toJSON();
+      
+      // Buscar incidencias resueltas
+      const incidences = productData.Incidences || [];
+      const resolvedIncidence = incidences.find(
+        inc => inc.status === 'resolved' && inc.resolution
+      );
+      
+      console.log(`Producto ${productData.id}: Tiene ${incidences.length} incidencias, Resuelta: ${!!resolvedIncidence}, Resolution: ${resolvedIncidence?.resolution}`);
+      
+      return {
+        ...productData,
+        hasResolvedIncidence: !!resolvedIncidence,
+        incidenceResolution: resolvedIncidence?.resolution || null
+      };
+    });
+    
+    res.json(mappedProducts);
   } catch (error) {
     res.status(500).json({ message: "Error al recuperar mis productos", error: error.message });
   }
