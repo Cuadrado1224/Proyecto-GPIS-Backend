@@ -1,4 +1,4 @@
-import { Product, Category, User, ProductPhoto, Incidence} from "../models/index.js";
+import { Product, Category, User, ProductPhoto, Incidence, Report} from "../models/index.js";
 import { Op } from "sequelize";
 import path from "path";
 import fs from "fs";
@@ -81,6 +81,12 @@ export const getMyProducts = async (req, res) => {
           model: Incidence,
           attributes: ['id', 'status', 'resolution', 'resolutionNotes', 'resolvedAt'],
           required: false // LEFT JOIN para incluir productos sin incidencias
+        },
+        { 
+          model: Report,
+          as: 'Reports', // Especificar el alias explícitamente
+          attributes: ['id', 'typeReport', 'description', 'dateReport'],
+          required: false // LEFT JOIN para incluir productos sin reportes
         }
       ]
     });
@@ -88,6 +94,12 @@ export const getMyProducts = async (req, res) => {
     // Mapear productos para incluir información de incidencia resuelta
     const mappedProducts = products.map(product => {
       const productData = product.toJSON();
+      
+      console.log(`📦 Producto ${productData.id}:`, {
+        Reports: productData.Reports?.length || 0,
+        Incidences: productData.Incidences?.length || 0,
+        moderationStatus: productData.moderationStatus
+      });
       
       // Buscar incidencias resueltas
       const incidences = productData.Incidences || [];
