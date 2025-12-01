@@ -8,6 +8,8 @@ const Notification = sequelize.define("Notification", {
   title: { type: DataTypes.TEXT, allowNull: false },
   message: { type: DataTypes.TEXT, allowNull: false },
   read: { type: DataTypes.BOOLEAN, defaultValue: false },
+  productId: { type: DataTypes.BIGINT, allowNull: true, field: "product_id" }, // Para notificaciones de productos
+  reportId: { type: DataTypes.BIGINT, allowNull: true, field: "report_id" },   // Para notificaciones de reportes
   createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, field: "created_at" },
 }, {
   tableName: "notifications",

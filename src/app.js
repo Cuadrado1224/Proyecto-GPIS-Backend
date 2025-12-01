@@ -22,9 +22,13 @@ import { swaggerUi, swaggerSpec } from "./config/swagger.js";
 import { authenticateToken } from "./middlewares/auth.middleware.js";
 import expressWs from "express-ws";
 import { metodos } from "./sockets/sockets.js";
+import { setWssInstance } from "./utils/websocket-emitter.js";
 
 const app = express();
 const wsInstance = expressWs(app);
+
+// Inicializar el WebSocket emitter global
+setWssInstance(wsInstance.getWss());
 
 // Middlewares
 app.use(cors());

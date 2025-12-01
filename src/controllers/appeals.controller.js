@@ -34,7 +34,10 @@ export const getAppealsByIncidence = async (req, res) => {
 
 export const createAppeal = async (req, res) => {
   try {
-    const { incidenceId, message, status } = req.body;
+    const { incidenceId, message } = req.body;
+    
+    console.log('📝 Crear apelación - Body recibido:', req.body);
+    console.log('📝 incidenceId:', incidenceId, '| message:', message);
 
     if (!incidenceId || !message) {
       return res.status(400).json({ message: "incidenceId y message son requeridos" });
@@ -44,15 +47,22 @@ export const createAppeal = async (req, res) => {
     const incidence = await Incidence.findByPk(incidenceId);
     if (!incidence) return res.status(404).json({ message: "Incidencia relacionada no encontrada" });
 
-    const appeal = await Appeal.create({
+    const appealData = {
       incidenceId,
-      message,
-      status: status || "pending",
-    });
+      description: message, // El modelo usa 'description' no 'message'
+      dateAppeals: new Date() // Fecha actual
+    };
+    
+    console.log('📝 Datos a insertar en DB:', appealData);
+
+    // Crear apelación usando los campos correctos del modelo
+    const appeal = await Appeal.create(appealData);
+    
+    console.log('✅ Apelación creada:', appeal.toJSON());
 
     res.status(201).json({ message: "Apelación creada", appeal });
   } catch (error) {
-    console.error("Error en createAppeal:", error);
+    console.error("❌ Error en createAppeal:", error);
     res.status(500).json({ message: "Error al crear apelación", error: error.message });
   }
 };
@@ -65,9 +75,10 @@ export const updateAppeal = async (req, res) => {
     const appeal = await Appeal.findByPk(appealId);
     if (!appeal) return res.status(404).json({ message: "Apelación no encontrada" });
 
+    // Actualizar usando el campo correcto del modelo
     await appeal.update({
-      message: message !== undefined ? message : appeal.message,
-      status: status !== undefined ? status : appeal.status,
+      description: message !== undefined ? message : appeal.description,
+      // El modelo no tiene campo 'status', solo se puede actualizar description
     });
 
     res.json({ message: "Apelación actualizada", appeal });

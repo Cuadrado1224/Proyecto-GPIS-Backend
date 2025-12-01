@@ -1,4 +1,5 @@
-import { Report } from "../models/index.js";
+import { Report, User, UserRole, Product, Notification } from "../models/index.js";
+import { emitNotificationToUsers } from "../utils/websocket-emitter.js";
 
 export const getAllReports = async (req, res) => {
   try {
@@ -34,13 +35,17 @@ export const getReportsByUser = async (req, res) => {
 
 export const createReport = async (req, res) => {
   try {
+    console.log('📝 === CREANDO REPORTE ===');
+    console.log('Body recibido:', req.body);
+    
     const { type, description, userId, productId } = req.body;
 
     if (!type || !description || !userId || !productId) {
+      console.log('❌ Faltan campos requeridos');
       return res.status(400).json({ message: "type, description, userId y productId son requeridos" });
     }
 
-    // Map API fields to model fields and set date by default
+    // Crear el reporte
     const report = await Report.create({
       dateReport: new Date(),
       typeReport: type,
@@ -48,6 +53,51 @@ export const createReport = async (req, res) => {
       userId,
       productId,
     });
+    
+    console.log('✅ Reporte creado:', report.id);
+
+    // Obtener información del producto para la notificación
+    const product = await Product.findByPk(productId);
+    const productTitle = product?.title || `Producto #${productId}`;
+    console.log('Producto encontrado:', productTitle);
+
+    // Obtener todos los moderadores y administradores (roleId 1=Admin, 3=Moderador)
+    const moderatorsAndAdmins = await UserRole.findAll({
+      where: { roleId: [1, 3] },
+      attributes: ['userId']
+    });
+    console.log('Moderadores encontrados:', moderatorsAndAdmins.length);
+    console.log('UserRoles:', JSON.stringify(moderatorsAndAdmins));
+
+    // Crear notificaciones para cada moderador/admin
+    const moderatorIds = [...new Set(moderatorsAndAdmins.map(ur => ur.userId))]; // Eliminar duplicados
+    console.log('IDs de moderadores unicos:', moderatorIds);
+    
+    if (moderatorIds.length === 0) {
+      console.log('⚠️ No se encontraron moderadores para notificar');
+      return res.status(201).json({ message: "Reporte creado (sin moderadores para notificar)", report });
+    }
+    
+    const notificationPromises = moderatorIds.map(modId =>
+      Notification.create({
+        userId: modId,
+        typeId: 2, // Alerta
+        title: 'Nuevo reporte de producto',
+        message: `Se ha reportado el producto "${productTitle}" por: ${type}. Descripción: ${description.substring(0, 100)}${description.length > 100 ? '...' : ''}`,
+        read: false,
+        productId: productId, // Agregar productId para poder redirigir
+        reportId: report.id    // Agregar reportId para referencia
+      })
+    );
+
+    const createdNotifications = await Promise.all(notificationPromises);
+
+    // Emitir notificaciones en tiempo real vía WebSocket
+    createdNotifications.forEach((notification, index) => {
+      emitNotificationToUsers(moderatorIds[index], notification.toJSON());
+    });
+
+    console.log(`✅ Reporte creado y ${moderatorIds.length} moderadores notificados (DB + WebSocket)`);
 
     res.status(201).json({ message: "Reporte creado", report });
   } catch (error) {
