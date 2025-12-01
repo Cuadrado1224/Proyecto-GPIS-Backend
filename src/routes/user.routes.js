@@ -45,6 +45,9 @@ const router = Router();
  *           type: string
  *         rating:
  *           type: number
+ *         ratingCount:
+ *           type: integer
+ *           description: Cantidad de calificaciones recibidas
  *         Roles:
  *           type: array
  *           items:
@@ -79,6 +82,9 @@ const router = Router();
  *           type: string
  *         roleId:
  *           type: integer
+ *         status:
+ *           type: string
+ *           example: "activo"
  *     UserLogin:
  *       type: object
  *       required:
@@ -100,6 +106,8 @@ const router = Router();
  *           type: string
  *         roleId:
  *           type: integer
+ *         status:
+ *           type: string
  */
 
 /**
@@ -186,6 +194,8 @@ router.delete("/me", authenticateToken, deleteMe);
  *                 type: string
  *               roleId:
  *                 type: integer
+ *               status:
+ *                 type: string
  *               avatar:
  *                 type: string
  *                 format: binary

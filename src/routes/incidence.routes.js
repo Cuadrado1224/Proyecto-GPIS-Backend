@@ -27,8 +27,7 @@ const router = express.Router();
  *           enum: [pending, in_progress, resolved]
  *         userId:
  *           type: integer
- *         moderatorId:
- *           type: integer
+ *           description: ID del moderador/administrador asignado
  *         productId:
  *           type: integer
  */

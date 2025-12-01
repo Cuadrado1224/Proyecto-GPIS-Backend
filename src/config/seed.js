@@ -35,6 +35,7 @@ export async function seedData() {
           avatarUrl:
             "/uploads/common/user-common.png",
           rating: 5,
+          ratingCount: 1,
           verified: true,
 
         },

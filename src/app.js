@@ -11,6 +11,7 @@ import conversationRoutes from "./routes/conversation.routes.js";
 import messageRoutes from "./routes/message.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 import favoriteRoutes from "./routes/favorite.routes.js";
+import ratingRoutes from "./routes/rating.routes.js";
 
 // Corregido el nombre del archivo (singular en lugar de plural)
 import incidenceRoutes from "./routes/incidence.routes.js";
@@ -21,9 +22,13 @@ import { swaggerUi, swaggerSpec } from "./config/swagger.js";
 import { authenticateToken } from "./middlewares/auth.middleware.js";
 import expressWs from "express-ws";
 import { metodos } from "./sockets/sockets.js";
+import { setWssInstance } from "./utils/websocket-emitter.js";
 
 const app = express();
 const wsInstance = expressWs(app);
+
+// Inicializar el WebSocket emitter global
+setWssInstance(wsInstance.getWss());
 
 // Middlewares
 app.use(cors());
@@ -39,6 +44,7 @@ app.use("/conversations", authenticateToken, conversationRoutes);
 app.use("/messages", authenticateToken, messageRoutes);
 app.use("/notifications", authenticateToken, notificationRoutes);
 app.use("/favorites", authenticateToken, favoriteRoutes);
+app.use("/ratings", authenticateToken, ratingRoutes);
 
 // También corregido aquí
 app.use("/incidences", authenticateToken, incidenceRoutes);
