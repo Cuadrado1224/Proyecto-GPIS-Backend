@@ -15,5 +15,5 @@ VOLUME ["/app/uploads"]
 # Expose port (change if your server uses a different port)
 EXPOSE 3020
 
-# Start the server
-CMD ["npm", "start"]
+# Start the server (usando npm run start:docker para evitar preload de dotenv)
+CMD ["npm", "run", "start:docker"]
