@@ -3,7 +3,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: ./DockerFile
+      dockerfile: ./Dockerfile
     environment:
       DB_NAME: marketplace
       DB_USER: Cuadrado1224
